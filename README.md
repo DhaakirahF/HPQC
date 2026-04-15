@@ -2,6 +2,8 @@
 
 task1.pdf - includes results for week 2 task 
 
+## Summary 
+Week 2 focused on analysing program performance in C and Python using different timing methods. Initially, the Linux time command was used to measure execution time of simple programs such as Hello World, showing that C executes faster than Python due to being compiled. The repeat adder program demonstrated how runtime depends mainly on the number of loop iterations, with the first input having the greatest impact, while the second input had little effect. Further experiments with printing revealed that runtime increases significantly with the number of outputs, highlighting that input/output operations can dominate execution time. Finally, file I/O programs were developed to write and read data from files, showing that runtime increases with file size and that these operations are more expensive than simple computation due to interaction with the operating system. Across all experiments, C consistently outperformed Python, particularly for larger inputs, demonstrating the efficiency advantage of compiled languages, while Python remained suitable for smaller-scale tasks despite its higher overhead.
 
 ## Programs
 The following programs were used:
