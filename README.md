@@ -1,7 +1,10 @@
-#WEEK 2 SUMMARY OF TASK 
+# WEEK 2 SUMMARY OF TASK 
+
 task1.pdf - includes results for week 2 task 
-##Summary 
-## Programs
+
+## Summary 
+
+# Programs
 The following programs were used:
 
 - `repeat_adder.c / .py`  
