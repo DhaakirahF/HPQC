@@ -18,22 +18,22 @@ int main(int argc, char **argv)
 	my_rank = uni_size = 0;
 
     // buffer variables for MPI_Bsend
-	int buffer_size;
-	void *buffer;
+	//int buffer_size;
+	//void *buffer;
 
 	// initialise MPI
 	ierror = MPI_Init(&argc, &argv);
 
     // set up the buffer for buffered send
-	buffer_size = MPI_BSEND_OVERHEAD + sizeof(int);
-	buffer = malloc(buffer_size);
-	if (buffer == NULL)
-	{
-		fprintf(stderr, "Buffer allocation failed.\n");
-		MPI_Finalize();
-		exit(-1);
-	}
-	MPI_Buffer_attach(buffer, buffer_size);
+	//buffer_size = MPI_BSEND_OVERHEAD + sizeof(int);
+	//buffer = malloc(buffer_size);
+	//if (buffer == NULL)
+	//{
+		//fprintf(stderr, "Buffer allocation failed.\n");
+		//MPI_Finalize();
+		//exit(-1);
+	//}
+	//MPI_Buffer_attach(buffer, buffer_size);
 
 	// gets the rank and world size
 	ierror = MPI_Comm_rank(MPI_COMM_WORLD, &my_rank);
@@ -46,8 +46,8 @@ int main(int argc, char **argv)
 	check_task(my_rank, uni_size);
 
     	// detach and free buffer
-	MPI_Buffer_detach(&buffer, &buffer_size);
-	free(buffer);
+	//MPI_Buffer_detach(&buffer, &buffer_size);
+	//free(buffer);
 
 	// finalise MPI
 	ierror = MPI_Finalize();
@@ -81,7 +81,7 @@ void client_task(int my_rank, int uni_size)
 	dest = 0;
 	send_message = my_rank * 10;
 
-	MPI_Bsend(&send_message, count, MPI_INT, dest, tag, MPI_COMM_WORLD);
+	MPI_Rsend(&send_message, count, MPI_INT, dest, tag, MPI_COMM_WORLD);
 
 	printf("Hello, I am %d of %d. Sent %d to Rank %d\n",
 	       my_rank, uni_size, send_message, dest);
