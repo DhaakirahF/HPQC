@@ -5,6 +5,7 @@
 // function declarations
 void root_task(int my_rank, int uni_size);
 void client_task(int my_rank, int uni_size);
+void check_task(int my_rank, int uni_size);
 
 int main(int argc, char **argv)
 {
@@ -24,14 +25,7 @@ int main(int argc, char **argv)
 
 	if (uni_size > 1)
 	{
-		if (0 == my_rank)
-		{
-			root_task(my_rank, uni_size);
-		}
-		else
-		{
-			client_task(my_rank, uni_size);
-		}
+		check_task(my_rank, uni_size);
 	}
 	else
 	{
@@ -54,13 +48,10 @@ void root_task(int my_rank, int uni_size)
 	// iterates through all the other ranks
 	for (int their_rank = 1; their_rank < uni_size; their_rank++)
 	{
-		// sets the source argument to the rank of the sender
 		source = their_rank;
 
-		// receives the messages
 		MPI_Recv(&recv_message, count, MPI_INT, source, tag, MPI_COMM_WORLD, &status);
 
-		// prints the message from the sender
 		printf("Hello, I am %d of %d. Received %d from Rank %d\n",
 		       my_rank, uni_size, recv_message, source);
 	}
@@ -72,16 +63,23 @@ void client_task(int my_rank, int uni_size)
 	send_message = dest = tag = 0;
 	count = 1;
 
-	// sets the destination for the message
-	dest = 0; // destination is root
-
-	// creates the message
+	dest = 0;
 	send_message = my_rank * 10;
 
-	// sends the message
 	MPI_Send(&send_message, count, MPI_INT, dest, tag, MPI_COMM_WORLD);
 
-	// prints the message from the sender
 	printf("Hello, I am %d of %d. Sent %d to Rank %d\n",
 	       my_rank, uni_size, send_message, dest);
+}
+
+void check_task(int my_rank, int uni_size)
+{
+	if (0 == my_rank)
+	{
+		root_task(my_rank, uni_size);
+	}
+	else
+	{
+		client_task(my_rank, uni_size);
+	}
 }
