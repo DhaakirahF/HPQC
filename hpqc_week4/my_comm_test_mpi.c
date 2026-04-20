@@ -18,7 +18,7 @@ int main(int argc, char **argv)
 	my_rank = uni_size = 0;
 
 	// initialise MPI
-	ierror = MPI_Init(&argc, &argv);
+	ierror = MPI_Init(argc, &argv);
 
 	// gets the rank and world size
 	ierror = MPI_Comm_rank(MPI_COMM_WORLD, &my_rank);
@@ -62,7 +62,7 @@ void client_task(int my_rank, int uni_size)
 	dest = 0;
 	send_message = my_rank * 10;
 
-	MPI_Send(&send_message, count, MPI_INT, dest, tag, MPI_COMM_WORLD);
+	MPI_Ssend(&send_message, count, MPI_INT, dest, tag, MPI_COMM_WORLD);
 
 	printf("Hello, I am %d of %d. Sent %d to Rank %d\n",
 	       my_rank, uni_size, send_message, dest);
