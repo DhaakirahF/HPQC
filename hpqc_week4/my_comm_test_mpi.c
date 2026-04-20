@@ -2,12 +2,9 @@
 #include <stdlib.h>
 #include <mpi.h>
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <mpi.h>
-
 // function declarations
 void root_task(int my_rank, int uni_size);
+void client_task(int my_rank, int uni_size);
 
 int main(int argc, char **argv)
 {
@@ -25,11 +22,6 @@ int main(int argc, char **argv)
 	ierror = MPI_Comm_rank(MPI_COMM_WORLD, &my_rank);
 	ierror = MPI_Comm_size(MPI_COMM_WORLD, &uni_size);
 
-	// creates and initialises transmission variables
-	int send_message, count, dest, tag;
-	send_message = dest = tag = 0;
-	count = 1;
-
 	if (uni_size > 1)
 	{
 		if (0 == my_rank)
@@ -38,18 +30,7 @@ int main(int argc, char **argv)
 		}
 		else
 		{
-			// sets the destination for the message
-			dest = 0; // destination is root
-
-			// creates the message
-			send_message = my_rank * 10;
-
-			// sends the message
-			MPI_Send(&send_message, count, MPI_INT, dest, tag, MPI_COMM_WORLD);
-
-			// prints the message from the sender
-			printf("Hello, I am %d of %d. Sent %d to Rank %d\n",
-			       my_rank, uni_size, send_message, dest);
+			client_task(my_rank, uni_size);
 		}
 	}
 	else
@@ -83,4 +64,24 @@ void root_task(int my_rank, int uni_size)
 		printf("Hello, I am %d of %d. Received %d from Rank %d\n",
 		       my_rank, uni_size, recv_message, source);
 	}
+}
+
+void client_task(int my_rank, int uni_size)
+{
+	int send_message, count, dest, tag;
+	send_message = dest = tag = 0;
+	count = 1;
+
+	// sets the destination for the message
+	dest = 0; // destination is root
+
+	// creates the message
+	send_message = my_rank * 10;
+
+	// sends the message
+	MPI_Send(&send_message, count, MPI_INT, dest, tag, MPI_COMM_WORLD);
+
+	// prints the message from the sender
+	printf("Hello, I am %d of %d. Sent %d to Rank %d\n",
+	       my_rank, uni_size, send_message, dest);
 }
