@@ -1,55 +1,31 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <mpi.h>
+#include <time.h>
 
 // function declarations
 void root_task(int my_rank, int uni_size);
 void client_task(int my_rank, int uni_size);
 void check_task(int my_rank, int uni_size);
 void check_uni_size(int uni_size);
+double to_second_float(struct timespec in_time);
+struct timespec calculate_runtime(struct timespec start_time, struct timespec end_time);
 
 int main(int argc, char **argv)
 {
-	// declare and initialise error handling variable
 	int ierror = 0;
 
-	// declare and initialise rank and size variables
 	int my_rank, uni_size;
 	my_rank = uni_size = 0;
 
-    // buffer variables for MPI_Bsend
-	//int buffer_size;
-	//void *buffer;
-
-	// initialise MPI
 	ierror = MPI_Init(&argc, &argv);
 
-    // set up the buffer for buffered send
-	//buffer_size = MPI_BSEND_OVERHEAD + sizeof(int);
-	//buffer = malloc(buffer_size);
-	//if (buffer == NULL)
-	//{
-		//fprintf(stderr, "Buffer allocation failed.\n");
-		//MPI_Finalize();
-		//exit(-1);
-	//}
-	//MPI_Buffer_attach(buffer, buffer_size);
-
-	// gets the rank and world size
 	ierror = MPI_Comm_rank(MPI_COMM_WORLD, &my_rank);
 	ierror = MPI_Comm_size(MPI_COMM_WORLD, &uni_size);
 
-	// check communicator size
 	check_uni_size(uni_size);
-
-	// decide which task to perform
 	check_task(my_rank, uni_size);
 
-    	// detach and free buffer
-	//MPI_Buffer_detach(&buffer, &buffer_size);
-	//free(buffer);
-
-	// finalise MPI
 	ierror = MPI_Finalize();
 	return 0;
 }
@@ -61,14 +37,26 @@ void root_task(int my_rank, int uni_size)
 	count = 1;
 	MPI_Status status;
 
+	struct timespec start_time, end_time, time_diff;
+	double runtime = 0.0;
+
 	for (int their_rank = 1; their_rank < uni_size; their_rank++)
 	{
 		source = their_rank;
 
+		timespec_get(&start_time, TIME_UTC);
+
 		MPI_Recv(&recv_message, count, MPI_INT, source, tag, MPI_COMM_WORLD, &status);
+
+		timespec_get(&end_time, TIME_UTC);
+
+		time_diff = calculate_runtime(start_time, end_time);
+		runtime = to_second_float(time_diff);
 
 		printf("Hello, I am %d of %d. Received %d from Rank %d\n",
 		       my_rank, uni_size, recv_message, source);
+		printf("Rank %d took %lf seconds to receive from Rank %d\n",
+		       my_rank, runtime, source);
 	}
 }
 
@@ -78,17 +66,25 @@ void client_task(int my_rank, int uni_size)
 	send_message = dest = tag = 0;
 	count = 1;
 
+	struct timespec start_time, end_time, time_diff;
+	double runtime = 0.0;
+
 	dest = 0;
 	send_message = my_rank * 10;
 
-    //MPI_Request request;
+	timespec_get(&start_time, TIME_UTC);
 
-	MPI_send(&send_message, count, MPI_INT, dest, tag, MPI_COMM_WORLD);
+	MPI_Send(&send_message, count, MPI_INT, dest, tag, MPI_COMM_WORLD);
 
-    //MPI_Wait(&request, MPI_STATUS_IGNORE);
+	timespec_get(&end_time, TIME_UTC);
+
+	time_diff = calculate_runtime(start_time, end_time);
+	runtime = to_second_float(time_diff);
 
 	printf("Hello, I am %d of %d. Sent %d to Rank %d\n",
 	       my_rank, uni_size, send_message, dest);
+	printf("Rank %d took %lf seconds to send to Rank %d\n",
+	       my_rank, runtime, dest);
 }
 
 void check_task(int my_rank, int uni_size)
@@ -115,4 +111,39 @@ void check_uni_size(int uni_size)
 		MPI_Finalize();
 		exit(-1);
 	}
+}
+
+double to_second_float(struct timespec in_time)
+{
+	double out_time = 0.0;
+	long int seconds, nanoseconds;
+	seconds = nanoseconds = 0;
+
+	seconds = in_time.tv_sec;
+	nanoseconds = in_time.tv_nsec;
+
+	out_time = seconds + nanoseconds / 1e9;
+
+	return out_time;
+}
+
+struct timespec calculate_runtime(struct timespec start_time, struct timespec end_time)
+{
+	struct timespec time_diff;
+	long int seconds, nanoseconds;
+	seconds = nanoseconds = 0;
+
+	seconds = end_time.tv_sec - start_time.tv_sec;
+	nanoseconds = end_time.tv_nsec - start_time.tv_nsec;
+
+	if (nanoseconds < 0)
+	{
+		seconds = seconds - 1;
+		nanoseconds = ((long int)1e9) + nanoseconds;
+	}
+
+	time_diff.tv_sec = seconds;
+	time_diff.tv_nsec = nanoseconds;
+
+	return time_diff;
 }
