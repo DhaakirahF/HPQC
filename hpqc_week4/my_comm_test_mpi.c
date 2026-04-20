@@ -6,6 +6,7 @@
 void root_task(int my_rank, int uni_size);
 void client_task(int my_rank, int uni_size);
 void check_task(int my_rank, int uni_size);
+void check_uni_size(int uni_size);
 
 int main(int argc, char **argv)
 {
@@ -23,15 +24,11 @@ int main(int argc, char **argv)
 	ierror = MPI_Comm_rank(MPI_COMM_WORLD, &my_rank);
 	ierror = MPI_Comm_size(MPI_COMM_WORLD, &uni_size);
 
-	if (uni_size > 1)
-	{
-		check_task(my_rank, uni_size);
-	}
-	else
-	{
-		// prints a warning
-		printf("Unable to communicate with less than 2 processes. MPI communicator size = %d\n", uni_size);
-	}
+	// check communicator size
+	check_uni_size(uni_size);
+
+	// decide which task to perform
+	check_task(my_rank, uni_size);
 
 	// finalise MPI
 	ierror = MPI_Finalize();
@@ -45,7 +42,6 @@ void root_task(int my_rank, int uni_size)
 	count = 1;
 	MPI_Status status;
 
-	// iterates through all the other ranks
 	for (int their_rank = 1; their_rank < uni_size; their_rank++)
 	{
 		source = their_rank;
@@ -81,5 +77,19 @@ void check_task(int my_rank, int uni_size)
 	else
 	{
 		client_task(my_rank, uni_size);
+	}
+}
+
+void check_uni_size(int uni_size)
+{
+	if (uni_size > 1)
+	{
+		return;
+	}
+	else
+	{
+		printf("Unable to communicate with less than 2 processes. MPI communicator size = %d\n", uni_size);
+		MPI_Finalize();
+		exit(-1);
 	}
 }
