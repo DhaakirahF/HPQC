@@ -18,7 +18,7 @@ int main(int argc, char **argv)
 	my_rank = uni_size = 0;
 
 	// initialise MPI
-	ierror = MPI_Init(argc, &argv);
+	ierror = MPI_Init(&argc, &argv);
 
 	// gets the rank and world size
 	ierror = MPI_Comm_rank(MPI_COMM_WORLD, &my_rank);
