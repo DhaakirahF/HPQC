@@ -81,7 +81,7 @@ void client_task(int my_rank, int uni_size)
 	dest = 0;
 	send_message = my_rank * 10;
 
-	MPI_Rsend(&send_message, count, MPI_INT, dest, tag, MPI_COMM_WORLD);
+	MPI_Isend(&send_message, count, MPI_INT, dest, tag, MPI_COMM_WORLD);
 
 	printf("Hello, I am %d of %d. Sent %d to Rank %d\n",
 	       my_rank, uni_size, send_message, dest);
