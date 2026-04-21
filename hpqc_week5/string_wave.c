@@ -2,10 +2,20 @@
 #include <stdlib.h>
 #include <math.h>
 
+//Structure to store all command-line settings
+typedef struct
+{
+	int points;
+	int cycles;
+	int samples;
+	char *output_path;
+} ProgramArgs;
+
 // declares the functions that will be called within main
 // note how declaration lines are similar to the initial line
 // of a function definition, but with a semicolon at the end;
-int check_args(int argc, char **argv);
+ProgramArgs check_args(int argc, char **argv);
+//int check_args(int argc, char **argv);
 void initialise_vector(double vector[], int size, double initial);
 void print_vector(double vector[], int size);
 int sum_vector(int vector[], int size);
@@ -16,14 +26,24 @@ void print_header(FILE** p_out_file, int points);
 
 int main(int argc, char **argv)
 {
+    // Read command-line arguments
+    ProgramArgs args = check_args(argc, argv);
+    int points = args.points;
+    int cycles = args.cycles;
+    int samples = args.samples;
+    char *output_path = args.output_path;
+
+    // Creates variables for the vibration
+    int time_steps = cycles * samples + 1;
+    double step_size = 1.0 / samples;
 	// declare and initialise the numerical argument variable
-	int points = check_args(argc, argv);
+	//int points = check_args(argc, argv);
 
 	// creates variables for the vibration
-	int cycles = 5; // number of cycles to show
-	int samples = 25; // sampling rate in samples per cycle
-	int time_steps = cycles * samples + 1; // total timesteps
-	double step_size = 1.0/samples;
+	//int cycles = 5; // number of cycles to show
+	//int samples = 25; // sampling rate in samples per cycle
+	//int time_steps = cycles * samples + 1; // total timesteps
+	//double step_size = 1.0/samples;
 
 	// creates a vector for the time stamps in the data
 	double* time_stamps = (double*) malloc(time_steps * sizeof(double));
