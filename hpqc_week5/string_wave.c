@@ -76,10 +76,21 @@ int main(int argc, char **argv)
 initialise_vector(positions, points, 0.0);
 
 	// creates a file
-	FILE* out_file;
+	//FILE* out_file;
      	//out_file = fopen("/Users/dhaakirahfasetire/Desktop/data/string_wave.csv","w");
-        out_file = fopen(output_path, "w");
-	print_header(&out_file, points);
+       // out_file = fopen(output_path, "w");
+	//print_header(&out_file, points);
+
+FILE* out_file;
+out_file = fopen(output_path, "w");
+if (out_file == NULL)
+{
+	fprintf(stderr, "Error: Could not open output file: %s\n", output_path);
+	free(time_stamps);
+	free(positions);
+	exit(-1);
+}
+print_header(&out_file, points);
 
 	// iterates through each time step in the collection
 	for (int i = 0; i < time_steps; i++)
@@ -130,29 +141,58 @@ double driver(double time)
 }
 
 // defines a function to update the positions
+// void update_positions(double* positions, int points, double time)
+// {
+// 	// creates a temporary vector variable for the new positions
+//         double* new_positions = (double*) malloc(points * sizeof(double));
+
+// 	// initialises the index
+// 	int i = 0;
+// 	new_positions[i] = driver(time);
+// 	// creates new positions by setting value of previous element
+// 	for (i = 1; i < points; i++)
+// 	{
+// 		new_positions[i] = positions[i-1];
+// 	}
+// 	// propagates these new positions to the old ones
+// 	for (i = 0; i < points; i++)
+//         {
+//                 positions[i] = new_positions[i];
+//         }
+
+// 	// frees the temporary vector
+// 	free(new_positions);
+// }
+
 void update_positions(double* positions, int points, double time)
 {
 	// creates a temporary vector variable for the new positions
-        double* new_positions = (double*) malloc(points * sizeof(double));
+	double* new_positions = (double*) malloc(points * sizeof(double));
+	if (new_positions == NULL)
+	{
+		fprintf(stderr, "Memory allocation failed in update_positions.\n");
+		exit(-1);
+	}
 
 	// initialises the index
 	int i = 0;
 	new_positions[i] = driver(time);
+
 	// creates new positions by setting value of previous element
 	for (i = 1; i < points; i++)
 	{
 		new_positions[i] = positions[i-1];
 	}
+
 	// propagates these new positions to the old ones
 	for (i = 0; i < points; i++)
-        {
-                positions[i] = new_positions[i];
-        }
+	{
+		positions[i] = new_positions[i];
+	}
 
 	// frees the temporary vector
 	free(new_positions);
 }
-
 // defines a set of timestamps
 int generate_timestamps(double* timestamps, int time_steps, double step_size)
 {
