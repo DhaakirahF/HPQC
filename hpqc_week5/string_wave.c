@@ -46,18 +46,39 @@ int main(int argc, char **argv)
 	//double step_size = 1.0/samples;
 
 	// creates a vector for the time stamps in the data
-	double* time_stamps = (double*) malloc(time_steps * sizeof(double));
-	initialise_vector(time_stamps, time_steps, 0.0);
-	generate_timestamps(time_stamps, time_steps, step_size);
+	//double* time_stamps = (double*) malloc(time_steps * sizeof(double));
+	//initialise_vector(time_stamps, time_steps, 0.0);
+	//generate_timestamps(time_stamps, time_steps, step_size);
+
+    double* time_stamps = (double*) malloc(time_steps * sizeof(double));
+    if (time_stamps == NULL)
+    {
+        fprintf(stderr, "Memory allocation failed for time_stamps.\n");
+        exit(-1);
+
+    }
+    initialise_vector(time_stamps, time_steps, 0.0);
+    generate_timestamps(time_stamps, time_steps, step_size);
 
 	// creates a vector variable for the current positions
-	double* positions = (double*) malloc(points * sizeof(double));
+	//double* positions = (double*) malloc(points * sizeof(double));
 	// and initialises every element to zero
-	initialise_vector(positions, points, 0.0);
+	//initialise_vector(positions, points, 0.0);
+
+    double* positions = (double*) malloc(points * sizeof(double));
+    if (positions == NULL)
+    {
+        fprintf(stderr, "Memory allocation failed for positions.\n");
+        free(time_stamps);
+        exit(-1);
+
+    }
+initialise_vector(positions, points, 0.0);
 
 	// creates a file
 	FILE* out_file;
-     	out_file = fopen("/Users/dhaakirahfasetire/Desktop/data/string_wave.csv","w");
+     	//out_file = fopen("/Users/dhaakirahfasetire/Desktop/data/string_wave.csv","w");
+        out_file = fopen(output_path, "w");
 	print_header(&out_file, points);
 
 	// iterates through each time step in the collection
@@ -182,25 +203,57 @@ void print_vector(double vector[], int size)
 }
 
 // defines a function that checks your arguments to make sure they'll do what you need
-int check_args(int argc, char **argv)
+// int check_args(int argc, char **argv)
+// {
+// 	// declare and initialise the numerical argument
+// 	int num_arg = 0;
+
+// 	// check the number of arguments
+// 	if (argc == 2) // program name and numerical argument
+// 	{
+// 		// declare and initialise the numerical argument
+// 		num_arg = atoi(argv[1]);
+// 	}
+// 	else // the number of arguments is incorrect
+// 	{
+// 		// raise an error
+// 		fprintf(stderr, "ERROR: You did not provide a numerical argument!\n");
+// 		fprintf(stderr, "Correct use: %s [NUMBER]\n", argv[0]);
+
+// 		// and exit COMPLETELY
+// 		exit (-1);
+// 	}
+// 	return num_arg;
+// }
+
+//Checks the command-line arguments and returns them in a struct
+ProgramArgs check_args(int argc, char **argv)
 {
-	// declare and initialise the numerical argument
-	int num_arg = 0;
+	ProgramArgs args;
 
-	// check the number of arguments
-	if (argc == 2) // program name and numerical argument
-	{
-		// declare and initialise the numerical argument
-		num_arg = atoi(argv[1]);
-	}
-	else // the number of arguments is incorrect
-	{
-		// raise an error
-		fprintf(stderr, "ERROR: You did not provide a numerical argument!\n");
-		fprintf(stderr, "Correct use: %s [NUMBER]\n", argv[0]);
+	// Expected usage:
+	   //string_wave <points> <cycles> <samples> <output_path>
 
-		// and exit COMPLETELY
-		exit (-1);
+	if (argc == 5)
+	{
+		args.points = atoi(argv[1]);
+		args.cycles = atoi(argv[2]);
+		args.samples = atoi(argv[3]);
+		args.output_path = argv[4];
+
+		if (args.points <= 0 || args.cycles <= 0 || args.samples <= 0)
+		{
+			fprintf(stderr, "Error: points, cycles, and samples must all be positive integers.\n");
+			exit(-1);
+		}
 	}
-	return num_arg;
+	else
+	{
+		fprintf(stderr, "ERROR: Incorrect number of arguments.\n");
+		fprintf(stderr, "Correct use: %s <points> <cycles> <samples> <output_path>\n", argv[0]);
+		fprintf(stderr, "Example: %s 50 5 25 /Users/dhaakirahfasetire/Desktop/data/string_wave.csv\n", argv[0]);
+		exit(-1);
+	}
+
+	return args;
 }
